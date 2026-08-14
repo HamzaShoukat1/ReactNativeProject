@@ -1,19 +1,8 @@
+import { Redirect } from "expo-router";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import {SafeAreaView} from "react-native-safe-area-context";
 export default function Index() {
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Edit app/index.tsx to edit this file.</Text>
-
-      <TouchableOpacity
-      onPress={()=> alert('Button pressed!')} >
-        <Text className="bg-green-500 flex text-3xl" >Press me</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  
+ return <Redirect href={"/(root)/(tabs)"} />;
+  
 }

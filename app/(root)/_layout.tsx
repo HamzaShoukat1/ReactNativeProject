@@ -1,13 +1,7 @@
-// import { View, Text } from "react-native";
-// import "../global.css"
-// import { SafeAreaView } from "react-native-safe-area-context";
-// import { Slot } from "expo-router";
-
 import { Slot } from "expo-router";
 import { View } from "react-native";
 
 export default function RootLayout() {
-
 
   return (
     <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
