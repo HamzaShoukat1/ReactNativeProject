@@ -9,18 +9,7 @@ export default function profile() {
   const router = useRouter()
   const {signOut} = useAuth()
   const handleSignOut = async () => {
-      if (Platform.OS === 'web') {
-    const isConfirmed = window.confirm("Are you sure you want to sign out?");
-    if (isConfirmed) {
-      try {
-        await signOut();
-        router.replace("/(auth)/sign-in");
-      } catch (error) {
-        console.error("Error signing out:", error);
-      }
-    }
-    return; // Stop function execution here for web
-  }
+   
     Alert.alert("Sign Out", "Are you sure you want to sign out?", [
       {
         text: "Cancel",
