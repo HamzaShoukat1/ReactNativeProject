@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native'
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useAccountQuery } from '@/hooks/queries/useAccountQuery'
 import { useTransactionQuery } from '@/hooks/queries/useTransactionQuery'
 import { useBudgetsQuery } from '@/hooks/queries/useBudgets'
@@ -14,6 +14,9 @@ import { Image } from 'react-native'
 import { RefreshControl } from 'react-native-gesture-handler'
 import { useUser } from '@clerk/expo'
 import { useUserStore } from '@/Store/userStore'
+import ExpenseBreakDown from '@/components/expense-breakdown-chart'
+import { BudgetModal } from '@/components/BudgetModel'
+import { TransactionRow } from '@/components/TransactionRow'
 export default function homeScreen() {
 
   const QUICK_ACTIONS = [
@@ -46,17 +49,23 @@ export default function homeScreen() {
     refetch: refetchAccounts,
   } = useAccountQuery();
   const {
-    data: transactions = [],
+    data: infiniteData ,
     isLoading: transactionsLoading,
     isRefetching: transactionsRefetching,
     refetch: refetchTransactions,
   } = useTransactionQuery();
   const { data: budget = null, refetch: refetchBudget } = useBudgetsQuery();
 
+    const transactions = useMemo(() => {
+      if (!infiniteData) return [];
+      return infiniteData.pages.flatMap((page)=> page)
+    }, [infiniteData]);
+
 
 
   const loading = accountsLoading || transactionsLoading;
   const refreshing = accountsRefetching || transactionsRefetching;
+  const [BudgetModelOpen, setBudgetModelOpen] = useState(false)
 
   const onRefresh = () => {
     refetchAccounts();
@@ -216,7 +225,122 @@ export default function homeScreen() {
             ))}
           </View>
         </View>
+        {/* //  */}
+
+        <View className="px-5 pt-[18px]  pb-1">
+          <TouchableOpacity
+            onPress={() => router.push("/(root)/(tabs)/assistant")}
+            className="bg-white rounded-[18px] border border-[#E8E6DF] p-3.5 flex-row items-center gap-2.5 mb-[18px]"
+          >
+            <View className="w-[26px] h-[40px] rounded-full bg-[#4A9EFF1A] items-center justify-center">
+              <View className="w-[7px] h-[7px] rounded-full bg-brand-blue" />
+            </View>
+            <Text className="text-brand-text-muted text-[13px] flex-1">
+              Ask AI anything about your money
+            </Text>
+            <Feather name="arrow-right" size={16} color="#4A9EFF" />
+          </TouchableOpacity>
+        </View>
+
+
+        {/* // */}
+
+
+        <TouchableOpacity
+          onPress={() => setBudgetModelOpen(true)}
+          activeOpacity={0.85}
+          className="bg-white rounded-[18px] m-3 border border-[#E8E6DF] p-4 mb-[14px] "
+        >
+          <View className="flex-row items-center justify-between mb-2.5">
+            <Text className="text-[#1A1D26] text-sm font-medium">
+              Monthly budget
+            </Text>
+            <Feather name="edit-2" size={13} color="#8A8D96" />
+          </View>
+
+          {budget ? (
+            <>
+              <Text className="text-brand-text-secondary text-xs mb-2">
+                {formatPrice(monthExpense, currency)} of{" "}
+                {formatPrice(budget.amount, currency)} spent
+              </Text>
+              <View className="h-2 rounded-full bg-[#F0EEE7] overflow-hidden">
+                <View
+                  className="h-2 rounded-full"
+                  style={{
+                    width: `${Math.min(
+                      Math.round((monthExpense / budget.amount) * 100),
+                      100
+                    )}%`,
+                    backgroundColor:
+                      monthExpense >= budget.amount
+                        ? "#FF6B4A"
+                        : monthExpense >= budget.amount * 0.8
+                          ? "#F7DC6F"
+                          : "#3DDC84",
+                  }}
+                />
+              </View>
+            </>
+          ) : (
+            <Text className="text-brand-text-secondary text-xs">
+              Tap to set a monthly spending budget
+            </Text>
+          )}
+        </TouchableOpacity>
+
+        {/* //  */}
+
+        <ExpenseBreakDown expenseBreakdown={expenseBreakdown} currency={currency} getCategoryConfig={getCategoryConfig} formatPrice={formatPrice} />
+
+        {/* ??  */}
+        <View className="flex-row justify-between items-center mb-3 px-3">
+          <Text className="text-[#1A1D26] text-sm font-medium">
+            Recent transactions
+          </Text>
+          <TouchableOpacity
+            onPress={() => router.push("/(root)/(tabs)/transactions")}
+          >
+            <Text className="text-brand-text-secondary text-xs">See all</Text>
+          </TouchableOpacity>
+
+        </View>
+        {/* //  */}
+
+
+        {loading ? (
+          <View className="items-center py-6">
+            <ActivityIndicator color="#4A9EFF" />
+          </View>
+        ) : recentTransactions.length === 0 ? (
+          <View className="items-center py-6">
+            <Feather name="inbox" size={28} color="#BDC3C7" />
+            <Text className="text-brand-text-muted text-sm mt-3">
+              No transactions yet
+            </Text>
+          </View>
+        ) : (
+          recentTransactions.map((tx) => (
+
+          <View className='ml-2 mr-2'>
+              <TransactionRow key={tx.id} tx={tx} />
+          </View>
+          ))
+        )}
+
       </ScrollView>
+
+      {user && (
+        <BudgetModal
+          visible={BudgetModelOpen}
+          budget={budget}
+          onClose={() => setBudgetModelOpen(false)}
+          onSaved={() => setBudgetModelOpen(false)}
+
+
+        />
+      )}
+
 
     </SafeAreaView>
 

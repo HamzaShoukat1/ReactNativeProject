@@ -39,7 +39,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="transactions"
         options={{
-          title: 'History',
+          title: 'Transactions',
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons name={focused ? "receipt" : "receipt-outline"} size={size} color={color} />
           ),
