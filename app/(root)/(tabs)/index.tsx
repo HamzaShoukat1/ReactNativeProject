@@ -322,8 +322,8 @@ export default function homeScreen() {
         ) : (
           recentTransactions.map((tx) => (
 
-          <View className='ml-2 mr-2'>
-              <TransactionRow key={tx.id} tx={tx} />
+          <View   key={tx.id} className='ml-2 mr-2'>
+              <TransactionRow tx={tx} />
           </View>
           ))
         )}
